@@ -26,4 +26,7 @@ interface ApiService {
 
     @GET("groups")
     suspend fun getGroups(): Response<List<GroupDto>>
+
+    @GET("users/me")
+    suspend fun getCurrentUser(): Response<UserDto>
 }
