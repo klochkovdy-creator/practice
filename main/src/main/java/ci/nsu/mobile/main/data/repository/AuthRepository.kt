@@ -19,12 +19,11 @@ class AuthRepository {
                 if (token != null) {
                     TokenManager.token = token
 
-                    // ↓↓↓ НОВОЕ: получаем профиль с userId ↓↓↓
                     val profileResponse = api.getCurrentUser()
                     if (profileResponse.isSuccessful) {
-                        val userId = profileResponse.body()?.id
-                        if (userId != null) {
-                            TokenManager.userId = userId.toLong()
+                        val user = profileResponse.body()
+                        if (user != null) {
+                            TokenManager.userId = user.id.toLong()
                             Result.success(Unit)
                         } else {
                             Result.failure(Exception("ID пользователя не получен"))
@@ -42,6 +41,7 @@ class AuthRepository {
             Result.failure(e)
         }
     }
+
 
     suspend fun register(request: RegisterRequest): Result<Unit> {
         return try {
