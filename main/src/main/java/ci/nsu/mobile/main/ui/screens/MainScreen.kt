@@ -1,5 +1,6 @@
 package ci.nsu.mobile.main.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,59 +17,53 @@ import ci.nsu.mobile.main.ui.viewmodels.UsersViewModel
 @Composable
 fun MainScreen(
     onLogout: () -> Unit,
+    onUserClick: (Int) -> Unit = {},
     viewModel: UsersViewModel = viewModel()
 ) {
     val usersState by viewModel.usersState.collectAsState()
 
-    Column(modifier = Modifier.fillMaxSize()) {
-
-        // Шапка
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+    ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Пользователи", style = MaterialTheme.typography.headlineSmall)
-            Button(onClick = {
-                viewModel.logout()
-                onLogout()
-            }) {
+            Button(onClick = { viewModel.logout(); onLogout() }) {
                 Text("Выйти")
             }
         }
-
         HorizontalDivider()
 
         when (val state = usersState) {
-            is UsersState.Loading -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+            is UsersState.Loading -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                CircularProgressIndicator()
             }
-
-            is UsersState.Error -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(state.message, color = MaterialTheme.colorScheme.error)
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Button(onClick = { viewModel.loadUsers() }) {
-                            Text("Повторить")
-                        }
+            is UsersState.Error -> Box(Modifier.fillMaxSize(), Alignment.Center) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(state.message, color = MaterialTheme.colorScheme.error)
+                    Spacer(Modifier.height(12.dp))
+                    Button(onClick = { viewModel.loadUsers() }) {
+                        Text("Повторить")
                     }
                 }
             }
-
             is UsersState.Success -> {
                 if (state.users.isEmpty()) {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
                         Text("Список пользователей пуст")
                     }
                 } else {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(Modifier.fillMaxSize()) {
                         items(state.users) { user ->
-                            UserItem(user)
+                            UserItem(
+                                user = user,
+                                onClick = { onUserClick(user.id) }
+                            )
                             HorizontalDivider()
                         }
                     }
@@ -79,20 +74,25 @@ fun MainScreen(
 }
 
 @Composable
-private fun UserItem(user: UserDto) {
-    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+private fun UserItem(
+    user: UserDto,
+    onClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    ) {
         val fullName = listOfNotNull(
             user.person?.lastName,
             user.person?.firstName,
             user.person?.middleName
         ).joinToString(" ").ifBlank { user.login }
-
         Text(fullName, style = MaterialTheme.typography.bodyLarge)
         Text(user.login, style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant)
-        user.email.let {
-            Text(it, style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant)
-        }
+        Text(user.email, style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

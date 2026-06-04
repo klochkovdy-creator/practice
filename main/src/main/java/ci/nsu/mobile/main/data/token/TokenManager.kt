@@ -7,6 +7,7 @@ object TokenManager {
 
     private const val PREFS_NAME = "auth_prefs"
     private const val KEY_TOKEN = "jwt_token"
+    private const val KEY_USER_ID = "user_id"
 
     private lateinit var prefs: SharedPreferences
 
@@ -23,5 +24,6 @@ object TokenManager {
 
     fun clear() {
         token = null
+        userId = null
     }
 }
