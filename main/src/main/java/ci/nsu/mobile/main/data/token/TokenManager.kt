@@ -7,7 +7,7 @@ object TokenManager {
 
     private const val PREFS_NAME = "auth_prefs"
     private const val KEY_TOKEN = "jwt_token"
-    private const val KEY_USER_ID = "user_id"  // ← ЭТА СТРОКА ДОЛЖНА БЫТЬ
+    private const val KEY_USER_ID = "user_id"
 
     private lateinit var prefs: SharedPreferences
 
@@ -18,29 +18,22 @@ object TokenManager {
     var token: String?
         get() = prefs.getString(KEY_TOKEN, null)
         set(value) {
-            if (value == null) {
-                prefs.edit().remove(KEY_TOKEN).apply()
-            } else {
-                prefs.edit().putString(KEY_TOKEN, value).apply()
-            }
+            if (value == null) prefs.edit().remove(KEY_TOKEN).apply()
+            else prefs.edit().putString(KEY_TOKEN, value).apply()
         }
 
-    // ↓↓↓ ЭТОТ БЛОК ДОЛЖЕН БЫТЬ ДОБАВЛЕН ↓↓↓
     var userId: Long?
         get() {
             val id = prefs.getLong(KEY_USER_ID, -1L)
             return if (id == -1L) null else id
         }
         set(value) {
-            if (value == null) {
-                prefs.edit().remove(KEY_USER_ID).apply()
-            } else {
-                prefs.edit().putLong(KEY_USER_ID, value).apply()
-            }
+            if (value == null) prefs.edit().remove(KEY_USER_ID).apply()
+            else prefs.edit().putLong(KEY_USER_ID, value).apply()
         }
 
     fun clear() {
         token = null
-        userId = null  // ← ЭТА СТРОКА ТОЖЕ ДОЛЖНА БЫТЬ
+        userId = null
     }
 }
